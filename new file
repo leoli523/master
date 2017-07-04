@@ -1,0 +1,147 @@
+<if><if>
+\\
+! \#$%&'()*+,-./0123456789:;<=>?
+! "#$%&'()*+,-./:;<=>?@[\]^_`{|}
+
+/tmp# cd /tmp/ && dl.sh -r 101 kmod-qca-wifi-10.4-3.0.198.187-unified-profile_3.14.43+WLAN.BL.3.3-00092-S-1-1_ipq40xx.ipk && opkg install --nodeps kmod-qca-wifi-10.4-3.0.198.187-unified-profile_3.14.43+WLAN.BL.3.3-00092-S-1-1_ipq40xx.ipk && reboot
+
+/home/leo/Downloads/firefox-sdk/bin/firefox &
+
+sudo /etc/init.d/xinetd restart
+
+iwpriv ath0 dbgLVL 0x00800000
+
+git annotate  0ac4b5a~1
+
+fprintf(stderr, "\n--%s-------------Leo debug------------>%s[%d]\n",__TIME__,__FUNCTION__,__LINE__);
+
+cd -;cd -;make -f Makefile.x86;./header_x86 -s /SmartOpenWrt-appagent/bin/ipq806x/EWS370_371_670_671.bin -d /tftpboot/1 -a
+
+/usr/bin/wtp --dir /etc/capwap --cert_dir /etc/capwap/ --dlog 1
+
+/usr/bin/wtp --if br-lan:manager --dir /etc/capwap --cert_dir /etc/capwap/ --dlog 1
+
+CW_CREATE_STRING_FROM_STRING_ERR(*pstr, "", return CWErrorRaise(CW_ERROR_OUT_OF_MEMORY, NULL););
+
+1d68d24ea0d9bb6e19949676058f1b93
+
+rm /tmp/luci-indexcache;
+rm /tmp/luci-modulecache/* -rf
+
+curl -i -X POST -d '{"method":"login","params":["admin","admin"]}' http://192.168.0.1:80/cgi-bin/luci/rpc/auth
+
+cd /etc/config
+tftp -gr network 192.168.1.10
+cd ~
+
+rm /overlay/etc/config/* -rf
+reboot
+
+uci get -c /rom/etc/config network.lan.ifname
+------------------------------------------------------------------------------------------------------------------
+PPPOE 
+
+71582272@ip.hinet.net
+iwkacmwd
+------------------------------------------------------------------------------------------------------------------
+
+luci.util.exec("echo "..a.." >/dev/console")
+echo -e "\e[0;32m==============\e[0m" 
+
+/SmartOpenWrt/SENAO/package/senao-luci/luci-0.11+svn9960_web_SC/modules/
+
+cd -;make -f Makefile.x86;cd -; ./senao-image-header/header_x86 -s /SmartOpenWrt-appagent/bin/ipq806x/openwrt-ipq806x-ews370_371_670_671-kernel.bin -d /SmartOpenWrt-appagent/bin/ipq806x/1 -a
+
+cd /SmartOpenWrt/;make package/sn_package/qca/devel/qca-legacy-uboot/compile V=s
+-----------------------------------------------------------------------------------------
+ISD2 Sitecom
+tftp 0x08060000 XXXXX;erase 0x9f040000 +$filesize;cp.b $fileaddr 0x9f040000 $filesize
+
+openwrt --> ISD2
+
+burn k && reboot
+
+-----------------------------------------------------------------------------------------
+EWS370 dual image
+Nand 清除指令: nand erase “offset"  “size" 
+
+=>  fw1: nand erase 0x0 0x4000000
+
+=>  fw2: nand erase 0x4000000 0x4000000
+
+tftpboot 0x42000000 2016_01_21_16_40_ews370_371_870_871-norplusnand-loader-s.img && sf probe && imgaddr=0x42000000 && source $imgaddr:script
+
+tftpboot 0x42000000 2016_01_21_16_40_ews370_371_870_871-ubi-root.img && nand device 0 && nand erase.chip && nand write $fileaddr 0x00000000 $filesize && nand write $fileaddr 0x4000000 $filesize
+
+------------------------------------------------------------------------------------------------------------------
+EWS1025 :
+set eth1addr 00:aa:bb:cc:66;tftp 0x80060000 openwrt-ar71xx-generic-ews1025-squashfs-sysupgrade.bin&&erase 0x9f060000 +$filesize&&cp.b $fileaddr 0x9f060000 $filesize
+------------------------------------------------------------------------------------------------------------------
+
+tftp 0x08060000 openwrt-ar71xx-generic-wlr8100-squashfs-sysupgrade.bin;erase 0x9f040000 +$filesize;cp.b $fileaddr 0x9f040000 $filesize
+
+tftpboot 0x08060000 openwrt-ar71xx-generic-ecb1200-squashfs-sysupgrade.bin;erase 0x9f040000 +$filesize;cp.b $fileaddr 0x9f050000 $filesize
+
+------------------------------------------------------------------------------------------------------------------
+EWS370:
+
+Kernel:
+
+set ipaddr 192.168.1.1 && tftpboot 0x42000000 2015_06_09_07_58_wlr9100-kernel.bin &&  sf probe && sf erase 0x00320000 +0x00200000 && sf write $fileaddr 0x00320000 $filesize
+
+tftpboot 0x42000000 openwrt-ipq806x-ews370_371_670_671-kernel.bin &&  sf probe && sf erase 0x00320000 +0x00200000 && sf write $fileaddr 0x00320000 $filesize
+
+rootfs:
+
+tftpboot 0x42000000 openwrt-ipq806x-ews370_371_670_671-squashfs-root.img  &&   sf probe && sf erase 0x00520000 +0x01800000 && sf write $fileaddr 0x00520000 $filesize
+
+
+erase 0x00520000 +0x01a00000
+
+------------------------------------------------------------------------------------------------------------------
+
+EWS380:
+
+set serverip 192.168.1.10 && tftpboot 0x88000000 openwrt-ipq40xx-ews380ap-norplusnand-all-s.img && sf probe && imgaddr=0x88000000 && source $imgaddr:script
+
+set serverip 192.168.1.10 && tftpboot 0x88000000 openwrt-ipq40xx-ews380ap-norplusnand-loader-s.img && sf probe && imgaddr=0x88000000 && source $imgaddr:script
+
+set serverip 192.168.1.10 && tftpboot 0x88000000 openwrt-ipq40xx-ews380ap-norplusnand-fw-s.img && sf probe && imgaddr=0x88000000 && source $imgaddr:script
+
+------------------------------------------------------------------------------------------------------------------
+ECB1750:
+
+tftp 0x08060000 openwrt-ar71xx-generic-ecb1750-squashfs-sysupgrade.bin;erase 0x9f050000 +$filesize;cp.b $fileaddr 0x9f050000 $filesize
+
+PakedgeUboot@2015
+
+build
+
+ex: 
+/SmartOpenWrt/SENAO/package/senao-sysutil/src/sysWlan.c
+
+cd /SmartOpenWrt
+make package/sn_package/senao-sysutil/compile V=s
+
+make package/sn_package/senao_sysutil/
+
+------------------------------------------------------------------------------------------------------------------
+kill -9 xxxx
+lighttpd -D -f /etc/lighttpd/lighttpd.conf &   (execute front)
+-------------------------------------------------------------------------------------------------
+
+替換 driver 的流程如下:
+
+1.執行 install.sh 將 compile 好的 .ko 丟到 tftpboot
+
+ex: ./install.sh SmartOpenWrt(目錄位置)
+
+2.將 dl.sh 傳到 device 上的 lib/modules/3.3.8 目錄
+
+3.執行 dl.sh
+
+ex: ./dl.sh 192.168.0.x (PC 的 IP Address)
+
+
+	
+

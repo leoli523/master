@@ -1,0 +1,6 @@
+script 
+
+./lib/function.sh : usually function
+
+./fileName functionName  : execute script in dut
+	

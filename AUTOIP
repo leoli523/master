@@ -1,0 +1,78 @@
+etc/hotplug.d/iface/
+90-autoIP
+
+---------------------------------------------------------------------------------------------
+
+if [ "$ACTION" = "ifup" ]; then
+    wanIp=`ubus call network.interface.wan status | grep '\"address\"' | awk '{print $2}' | awk '{split($0,a,"\"");print a[2]}'`
+    echo wanIP=$wanIp >/dev/console
+    lanIp=`uci get network.lan.ipaddr`
+    lanMask=`uci get network.lan.netmask`
+    echo lanIP=$lanIp > /dev/console
+    echo lanMask$lanMask > /dev/console
+	
+	result=$(awk -v lanIp="$lanIp" -v wanIp="$wanIp" -v lanMask="$lanMask" \
+	'BEGIN {
+	split(lanIp,a,".");
+	split(lanMask,b,".");
+
+	defLanIp1="192.168.1.1";
+	defLanIp2="192.168.0.1";
+	defLanMask="255.255.255.0";
+	split(defLanIp1,c,".");
+	split(defLanMask,d,".");
+	for(i=1;i<=4;i++)
+	{ss[i]=and(c[i],d[i]);ee[i]=or(c[i],255-d[i]);}
+	deflanSubnet=ss[1]"."ss[2]"."ss[3]"."ss[4];
+	deflanBroadcast=ee[1]"."ee[2]"."ee[3]"."ee[4];
+
+	print "defLanIp="defLanIp1;
+	print "defLanMask="defLanMask;
+	print "deflanSubnet="deflanSubnet;
+	print "deflanBroadcast="deflanBroadcast;
+
+	for(i=1;i<=4;i++)
+	{s[i]=and(a[i],b[i]);e[i]=or(a[i],255-b[i]);}
+	lanSubnet=s[1]"."s[2]"."s[3]"."s[4];
+	lanBroadcast=e[1]"."e[2]"."e[3]"."e[4];
+	print "lanSubnet="lanSubnet;
+	print "lanBroadcast="lanBroadcast;
+	
+	split(wanIp,w,".");
+
+	if(s[1]<=w[1] && w[1]<=e[1] && \
+	   s[2]<=w[2] && w[2]<=e[2] && \
+	   s[3]<=w[3] && w[3]<=e[3] && \
+	   s[4]<=w[4] && w[4]<=e[4])
+	   	{
+	   	print "yes";
+	   		if(ss[1]<=w[1] && w[1]<=ee[1] && \
+			   ss[2]<=w[2] && w[2]<=ee[2] && \
+			   ss[3]<=w[3] && w[3]<=ee[3] && \
+			   ss[4]<=w[4] && w[4]<=ee[4])
+			   {
+			   	print "yes!!!!!";
+			   	system("uci set network.lan.ipaddr="defLanIp2);
+			   	system("uci set network.lan.netmask="defLanMask);
+			   	system("uci commit network");
+			   	system("reboot");
+	   			
+			   }
+			else{
+				print "NO!!!!!!!";
+				system("uci set network.lan.ipaddr="defLanIp1);
+			   	system("uci set network.lan.netmask="defLanMask);
+			   	system("uci commit network");
+			   	system("reboot");
+
+			}
+	   	}
+	else
+	  	{
+	  	print "no";
+	  	}
+	}')
+	echo $result >/dev/console
+
+fi
+

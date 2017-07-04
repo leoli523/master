@@ -1,0 +1,98 @@
+controllor/admin
+index.lua --> decide who can log in
+
+etc/init.d/
+factory_setting --> judge if first time boot  
+
+-------------------------------------------------------------------------------------
+
+#!/bin/sh /etc/rc.common
+
+START=19
+
+get_mac_dual() {
+	local device=$1
+	local phydevice=${device}
+	if [ "$device" = "wifi0" ]; then
+   		printf $(setconfig -g 6 |tr [a-z] [A-Z]|sed 's/://g'|cut -c 7-)
+	else
+		printf $(setconfig -g 8 |tr [a-z] [A-Z]|sed 's/://g'|cut -c 7-)
+	 
+	fi
+}
+
+check_ssid() {
+	local ssid
+	local device
+	config_get ssid $1 ssid
+	config_get device $1 device
+
+	mac="$(get_mac_dual $device)"
+	ssid2=$(echo "$ssid")
+	ssid2=$(eval "echo $ssid2 | sed -e 's/-mac-/$mac/g'")
+	mac_ssid="$ssid2"
+	uci set wireless."$1".ssid="$mac_ssid"
+}
+
+check_security() {
+	local enc
+	local key
+
+	case "$enc" in
+		none)
+		;;
+		*psk*)
+			key="$(sysCommand generate wpa2psk)"
+			uci set wireless."$1".key="$key"
+		;;
+		*wpa*)
+		;;
+		*wep*)
+		;;
+		8021x)
+		;;
+		*)
+		;;
+	esac
+}
+
+check_login_passwd() {
+	local account
+	local passwd
+	account="$(grep ":" /etc/webpasswd|cut -d : -f 1)"
+	passwd="$(sysCommand generate wpa2psk 0)"
+	sysCommand setup login "$account" "$passwd"
+}
+
+check_wpsPinCode() {
+	local wps_pin
+	local device
+	local wifix
+	local pin_code
+
+	config_get wps_pin $1 wps_pin
+	config_get device $1 device
+
+	[ -n "$wps_pin" ] && {
+		wifix=${device:4:4}
+		pin_code="$(sysCommand generate wpsPin $wifix)"
+		uci set wireless."$1".wps_pin="$pin_code"
+	}
+}
+
+start() {
+	[ ! -d /overlay/etc/lighttpd ] && {
+                cp /rom/etc/config/wireless /etc/config/wireless
+                config_load wireless
+		config_foreach check_ssid wifi-iface
+		config_foreach check_security wifi-iface
+		config_foreach check_wpsPinCode wifi-iface		
+		sleep 1
+		uci commit
+		check_login_passwd	
+	}
+}
+
+stop() {
+    echo "$0" do nothing
+}

@@ -1,0 +1,29 @@
+gitpull : pull latest code
+
+gitpush : push modify code
+
+git add : add / modify file
+
+git rm : delete file
+
+gitcommit : (if already commit not push but don't want commit point : git reset (commit point))
+
+sudo git mergetool : if conflict
+
+sudo git difftool : compare file to local server
+
+git cherry-pick : add to another branch
+
+git diff --stat : (ex:git diff --stat b6397c2~1 b6397c2) check how many files changes
+
+gitcheckout : (ex:gitcheckout /origin/master) go to other branch
+
+gitcheckout2 : history branch
+
+gitresteall : kill all 
+
+git annotate : show who change
+
+git revert (which point)
+
+git reset (to where)

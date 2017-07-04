@@ -1,0 +1,6 @@
+cd /etc  -->  radvd -C radvd_stateful_MO10.conf -d 5
+cd /var/lib/dibbler    -->   dibbler-server run
+cd ~/ipv6/aftr-1.1 --> dhclient eth0
+clean cache --> cd /var/lib/dibbler    rm -rf sever-AddrMgr.xml server-cache.xml
+
+ipv4 setting see --> vi /ipv6/aftr-1.1/conf/aftr.conf
