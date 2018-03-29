@@ -1,0 +1,10 @@
+#!/bin/sh
+
+for section in `uci show wireless | grep 'wep\|wpa+\|wpa-\|psk+\|psk-' |  cut -d "." -f2 | grep -v 'ssid'`;do 
+    cmd_reset=`eval uci show wireless.${section} -c /rom/etc/config/`
+    eval ${section}_conf=\$cmd_reset
+    for i in $(eval echo \$${section}_conf); do
+        [ -n "${DEBUG}" ] && echo "---------debug------uci set $i-----"
+        uci set $i 2> /dev/null
+    done
+done
