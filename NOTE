@@ -1,0 +1,398 @@
+NOTE
+---------------------------------------------------------------------------------------------------------------------------
+cat /tmp/ezm_config_set | openssl enc -base64 -d -A| jq
+
+chilli_query list
+chilli_query authorize ip 10.11.0.1
+insmod ebtables.ko && insmod ebtable_filter.ko && insmod ebt_mark.ko
+ebtables -I OUTPUT -o ath1 -j mark --mark-or 0x1000000
+
+ebtables -t broute -I BROUTING -i ath0 -j mark --mark-or 0x1000000
+
+        option enable '1'
+        option appid '91,64'
+        list tc '91,100,200'
+        list tc '64,300,400'
+
+tc qdisc del dev eth1 root
+tc qdisc add dev eth1 root handle 1: htb default 20
+tc class add dev eth1 parent 1: classid 1:10 htb rate 2000kbit ceil 2000kbit prio 0 quantum 1500
+tc filter add dev eth1 parent 1: protocol ip prio 100 handle 0x5b/0xff0000 fw classid 1:10
+tc filter add dev eth1 parent 1: protocol ip prio 100 handle 0x5b/0xff0000 fw classid 1:10
+tc filter add dev eth1 parent 1: prio 102 u32 match ether src 84:7a:88:8d:82:e2 flowid 1:10
+
+ifconfig ifb0 up
+tc qdisc del dev ifb0 root
+tc qdisc add dev eth1 ingress handle ffff:
+tc filter replace dev eth1 parent ffff:  u32 match ip protocol 0 0x00 action mirred egress redirect dev ifb0
+tc qdisc add dev ifb0 root handle 1: htb
+tc class add dev ifb0 parent 1: classid 1:20 htb rate 2000kbit ceil 2000kbit prio 0 quantum 1500
+tc filter add dev ifb0 parent 1: prio 103 u32 match ether dst 84:7a:88:8d:82:e2 flowid 1:20
+
+tc filter add dev ifb0 parent 1: protocol ip prio 103 handle 0x5b/0xff0000 fw classid 1:20
+
+
+tc qdisc add dev eth1 parent 1:10 handle 100: pfifo
+
+
+
+tc qdisc del dev ath12 root
+tc qdisc add dev ath12 root handle 1: htb default 20
+tc class add dev ath12 parent 1: classid 1:10 htb rate 2000kbit ceil 2000kbit prio 0 quantum 1500
+tc class add dev ath12 parent 1: classid 1:20 htb rate 200000kbit ceil 200000kbit prio 0 quantum 1500
+tc filter add dev ath12 parent 1: protocol ip prio 110 handle 0x5b3300 fw classid 1:10
+
+tc filter add dev ath12 parent 1: prio 102 u32 match ether src 84:7a:88:8d:82:e2 flowid 1:10 (X)
+tc filter add dev ath12 parent 1: prio 102 u32 match ether dst 84:7a:88:8d:82:e2 flowid 1:10 (O)
+
+tc filter add dev ath12 parent 1: prio 102 u32 match ip src 172.27.0.36/24 classid 1:10
+tc qdisc add dev ath12 parent 1:10 handle 100: sfq
+tc qdisc add dev ath12 parent 1:20 handle 120: sfq
+
+tc filter add dev ath12 parent 1: prio 102 u32 match ether src 84:7a:88:8d:82:e2 flowid 1:10
+
+iptables -I POSTROUTING -t mangle --match mark --mark 0x5b3300 -j RETURN ( test if mark is set )
+
+
+ifconfig ifb0 up
+tc qdisc add dev ath12 ingress handle ffff:
+tc filter replace dev ath12 parent ffff:  u32 match ip protocol 0 0x00 action mirred egress redirect dev ifb0
+tc qdisc add dev ifb0 root handle 1: htb default 40
+tc class add dev ifb0 parent 1: classid 1:30 htb rate 2000kbit ceil 2000kbit prio 0 quantum 1500
+tc class add dev ifb0 parent 1: classid 1:40 htb rate 200000kbit ceil 200000kbit prio 0 quantum 1500
+tc filter add dev ifb0 parent 1: protocol ip prio 130 handle 0x5b3300 fw classid 1:30
+tc qdisc add dev ifb0 parent 1:30 handle 130: sfq
+tc qdisc add dev ifb0 parent 1:40 handle 140: sfq
+
+
+
+tc qdisc del dev $child_iface root 2> /dev/null
+tc qdisc add dev $child_iface root handle 1: htb
+tc filter add dev $child_iface parent 1: protocol ip u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev $ifb_iface
+
+---------------------------------------------------------------------------------------------------------------------------
+Cloud
+http://ezmcloud.dev.test.s3-website-us-west-2.amazonaws.com/
+user name: senaocloud@gmail.com
+password: senaoSENAO1234
+
+etcd_url:https://f77erk4x0j.execute-api.us-west-2.amazonaws.com/test/etcd
+
+register cloud mac
+https://docs.google.com/spreadsheets/d/1yjx3avtcfCD-tyf2LTr_nwNUSXdZToEFZxpFJJWcRkE/edit#gid=0
+---------------------------------------------------------------------------------------------------------------------------
+nDPI
+
+ndpi + capative portal
+iptables -I ndpi_chain -o br-ssid1 -j ndpi_wifi1_ssid_1_out
+iptables -I ndpi_chain -m physdev --physdev-in ath1 -j ndpi_wifi1_ssid_1_in
+
+
+69118 6477K MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            MARK xset 0x1/0xf00
+ 9764  979K MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol QUIC MARK xset 0xbc/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol eBay MARK xset 0xb3/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol Spotify MARK xset 0x9c/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol YouTubeUpload MARK xset 0x88/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol YouTube MARK xset 0x7c/0xff0000
+   85 15032 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol NetFlix MARK xset 0x85/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol Sina(Weibo) MARK xset 0xc8/0xff0000
+   69 13484 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol Twitter MARK xset 0x78/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol Instagram MARK xset 0xd3/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol LinkedIn MARK xset 0xe9/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol WeChat MARK xset 0xc5/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol GoogleMaps MARK xset 0x7b/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol GoogleHangout MARK xset 0xc9/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol WhatsAppVoice MARK xset 0xbd/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol WhatsAppFiles MARK xset 0xf2/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol WhatsApp MARK xset 0x8e/0xff0000
+    0     0 MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol FacebookZero MARK xset 0x1e/0xff0000
+ 2105  316K MARK       all  --  *      *       0.0.0.0/0            0.0.0.0/0            ndpi protocol Facebook MARK xset 0x77/0xff0000
+
+appid Test: 119,133,142,156,188,211
+
+/tftpboot/ndpi.csv --> category application id
+
+iptables -m connbytes --connbytes-dir both --connbytes-mode bytes
+
+iptables -N ssid1_in
+iptables -I FORWARD -m physdev --physdev-in ath1 --physdev-out eth0 -j ssid1_in
+iptables -I ssid1_in -j MARK --set-xmark 0x201
+
+
+iptables -N ssid1_out
+iptables -I FORWARD -m physdev --physdev-in eth0 --physdev-out ath1 -j ssid1_out
+iptables -I ssid1_out -j MARK --set-xmark 0x202
+
+iptables -L FORWARD -nv ; iptables -L ssid1_in -nv;iptables -L ssid1_out -nv
+
+
+/tmp/ndpi_all_rule --> performance will down to 50M
+
+nDPI
+https://github.com/ntop/nDPI.git
+
+ndpi-netfilter
+https://github.com/openwrt-develop/ndpi-netfilter
+https://github.com/vel21ripn/nDPI.git
+
+create a 50Mb file
+dd if=/dev/full of=./50Mb bs=1024 count=50000
+
+Let NB can use internet
+echo 1 > /proc/sys/net/ipv4/conf/enx00606eb0415a/proxy_arp
+echo 1 >  /proc/sys/net/ipv4/conf/eno1/proxy_arp
+route add -net 172.27.0.199 netmask 255.255.255.255 dev enx00606eb0415a
+---------------------------------------------------------------------------------------------------------------------------
+:%s/\(^.*\),\(.*$\)/{1,"\1",\2},/gci
+---------------------------------------------------------------------------------------------------------------------------
+SENAO LOG
+dl.sh -r 12 qca_da.ko
+dl.sh -r 12 qca_ol.ko
+dl.sh -r 12 qdf.ko
+dl.sh -r 12 ath_dev.ko
+dl.sh -r 12 umac.ko
+dl.sh -r 12 hst_tx99.ko
+dl.sh -r 12 ath_hal.ko
+dl.sh -r 12 ath_pktlog.ko
+dl.sh -r 12 ath_rate_atheros.ko
+dl.sh -r 12 asf.ko
+
+wlanconfig ath1 stastat MAC
+hostapd_cli -i ath1 -p /var/run/hostapd-wifi1/
+
+hostapd -g /var/run/hostapd/global -P /var/run/hostapd-global.pid -dd &
+
+cd /tmp && dl.sh -r 12 qca-hostap_1_ipq40xx.ipk && opkg install qca-hostap_1_ipq40xx.ipk && dl.sh -r 12 qca-hostapd-cli_1_ipq40xx.ipk && opkg install qca-hostapd-cli_1_ipq40xx.ipk && cd /etc/init.d && dl.sh -r 12 qca-hostapd && cd /lib/wifi/ && dl.sh -r 12 hostapd.sh
+---------------------------------------------------------------------------------------------------------------------------
+Snort
+
+dl.sh -r 10 libdnet_1.12-1_ipq40xx.ipk && opkg install libdnet_1.12-1_ipq40xx.ipk
+dl.sh -r 10 libdaq_2.0.6-2_ipq40xx.ipk && opkg install libdaq_2.0.6-2_ipq40xx.ipk
+dl.sh -r 10 luajit_2.0-1_ipq40xx.ipk && opkg install luajit_2.0-1_ipq40xx.ipk
+dl.sh -r 10 snort_2.9.11.1-6_ipq40xx.ipk && opkg install snort_2.9.11.1-6_ipq40xx.ipk
+dl.sh -r 10 libdbus_1.9.14-1_ipq40xx.ipk && opkg install libdbus_1.9.14-1_ipq40xx.ipk
+dl.sh -r 10 dbus_1.9.14-1_ipq40xx.ipk && opkg install dbus_1.9.14-1_ipq40xx.ipk
+dl.sh -r 10 libpcap_1.8.1-1_ipq40xx.ipk && opkg install libpcap_1.8.1-1_ipq40xx.ipk
+
+---------------------------------------------------------------------------------------------------------------------------
+AP MODE:
+ADDR               AID CHAN TXRATE RXRATE RSSI    TXBYTES    RXBYTES IDLE  TXSEQ  RXSEQ  CAPS        ACAPS     ERP    STATE MAXRATE(DOT11) HTCAPS ASSOCTIME    IEs   MODE PSMODE
+92:dc:96:6e:2f:e6    1  165 173M    192M  -40        7Kb        7Kb    4      0   65535    Es         0          b              0           AWPM 00:00:19 WME IEEE80211_MODE_11AC_VHT20   0 
+
+CB MODE:
+
+
+dl.sh -r 12 sn-websockets-server_1.0.0-1_ar71xx.ipk && opkg install sn-websockets-server_1.0.0-1_ar71xx.ipk
+
+dl.sh -r 13 syseye_1.0.0-1_ipq40xx.ipk && opkg install syseye_1.0.0-1_ipq40xx.ipk && dl.sh -r 13 syseye-ipc_1.0.0-1_ipq40xx.ipk && opkg install syseye-ipc_1.0.0-1_ipq40xx.ipk && killall syseye && syseye &
+
+ETD5-ACS:
+tftp 0x08060000 openwrt-ar71xx-spf5.3_cs-etd5acs-squashfs-sysupgrade.bin;erase 0x9f150000 +$filesize;cp.b $fileaddr 0x9f150000 $filesize
+
+---------------------------------------------------------------------------------------------------------------------------
+echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
+sudo iptables -I INPUT -j NFQUEUE
+sudo iptables -I OUTPUT -j NFQUEUE
+sudo iptables -I FORWARD -j NFQUEUE
+iptables -D FORWARD 1
+
+Suricata-Update	: The tool for updating your Suricata rules. (https://github.com/jasonish/suricata-update)
+
+/usr/bin/suricata -c /etc/suricata/suricata.yaml -q 10 --pidfile /var/run/suricata/suricata.pid
+
+Trisul Network Analytics
+
+dl.sh -r 10 libssp_-1_ipq40xx.ipk && opkg install libssp_-1_ipq40xx.ipk
+dl.sh -r 10 libyaml_0.1.6-1_ipq40xx.ipk && opkg install libyaml_0.1.6-1_ipq40xx.ipk
+dl.sh -r 10 libnfnetlink_1.0.1-1_ipq40xx.ipk && opkg install libnfnetlink_1.0.1-1_ipq40xx.ipk
+dl.sh -r 10 libiconv-full_1.11.1-1_ipq40xx.ipk && opkg install libiconv-full_1.11.1-1_ipq40xx.ipk
+dl.sh -r 10 libmnl_1.0.3-2_ipq40xx.ipk && opkg install libmnl_1.0.3-2_ipq40xx.ipk
+dl.sh -r 10 libnetfilter-queue_1.0.2-1_ipq40xx.ipk && opkg install libnetfilter-queue_1.0.2-1_ipq40xx.ipk
+dl.sh -r 10 suricata_4.0.4_ipq40xx_org.ipk && opkg install suricata_4.0.4_ipq40xx_org.ipk
+---------------------------------------------------------------------------------------------------------------------------
+ifplugd issue: ( top -d 1 ; cpu sys usage will too high)
+
+1./SmartOpenWrt_EX/qca/src/qca-edma/edma_axi.c (backup in /tftpboot/edma_axi.c)
+2./SmartOpenWrt_EX/SENAO/patches/quilt/PKG/ifplugd/201-sn-ifplugd-detect-ethernet-status/201-sn-ifplugd-detect-ethernet-status.patch (backup in /tftpboot/)
+
+result: cpu sys usage will normal, but need to check linux version
+
+---------------------------------------------------------------------------------------------------------------------------
+echo "/dev/console" > /tmp/sedbg
+seipc -t ram -a "act_wifi_clinfo act_wifi_clinfo"
+
+P.S. syseye not handle memory leak issue (traffic over 4G will fail)
+     txbytes rxbytes seems not accurate (KB?)
+
+---------------------------------------------------------------------------------------------------------------------------
+2018/10/15
+todo
+(Websocket) 
+(Snort) discuss with ryan Lionic spec.
+
+---------------------------------------------------------------------------------------------------------------------------
+2018/10/11
+Facebook test accout
+f235408@nwytg.net
+zaq1@wsx
+
+---------------------------------------------------------------------------------------------------------------------------
+2018/10/4
+snort -2.9.11.1-6
+
+libnghttp2  (need cmake version over 3.0) ==> reference https://blog.csdn.net/qq_22237829/article/details/74174322
+
+dl.sh -r 11 snort_2.9.11.1-6_ipq40xx.ipk && opkg install snort_2.9.11.1-6_ipq40xx.ipk && /etc/init.d/snort disable && /etc/init.d/snort stop
+/usr/bin/snort --daq-dir /usr/lib/daq/ -i br-lan -c /etc/snort/snort.conf
+
+ln -sf ./libluajit-5.1.so.2.0.0 libluajit-5.1.so.2
+
+1d68d24ea0d9bb6e19949676058f1b93
+
+rm -rf snort_2.9.11.1-6_ipq40xx.ipk
+---------------------------------------------------------------------------------------------------------------------------
+/usr/local/bin/snort -c /etc/snort/snort.conf -A fast -i eno1
+snort debug 0x0002000200000000LL
+
+f235408@nwytg.net
+
+One alternative is to run softflowd on the router and send the data to ntop running on an external server.
+---------------------------------------------------------------------------------------------------------------------------
+2018.9.19
+libpcap + PF_RING ---> tcpdump (will kernel warning) FAIL  ==>snaplen
+
+packets captured              <==捉下來的封包數量
+packets received by filter    <==由過濾所得的總封包數量
+packets dropped by kernel     <==被核心所丟棄的封包
+
+---------------------------------------------------------------------------------------------------------------------------
+
+2018.7.27
+pcap patch pf_ring in /tftpboot/libpcap-1.8.1  (not compile yet)
+
+./common/socket.c 
+
+
+cd /SmartOpenWrt/SENAO/package/dhcp
+rm /tftpboot/dhcp-3.1.0 -rf && cp /SmartOpenWrt/build_dir/target-arm-openwrt-linux-uclibcgnueabi/dhcp/dhcp-3.1.0 /tftpboot/ -r && mm compile install
+
+#DUT
+dl.sh -r 2 dhcp-relay_3.1.0-1_ipq40xx.ipk && opkg install dhcp-relay_3.1.0-1_ipq40xx.ipk
+
+LIBS = /SmartOpenWrt/build_dir/target-arm-openwrt-linux-uclibcgnueabi/libpfring-1.0.0/userland/lib/libpfring.so
+
+INCLUDES = -I$(TOP) $(BINDINC) -I$(TOP)/includes -I/SmartOpenWrt/build_dir/target-arm-openwrt-linux-uclibcgnueabi/libpfring-1.0.0/kernel/ -I/SmartOpenWrt/build_dir/target-arm-openwrt-linux-uclibcgnueabi/libpfring-1.0.0/userland/lib/ -I/SmartOpenWrt/staging_dir/target-arm-openwrt-linux-uclibcgnueabi_gcc-4.8-linaro/usr/include -llibpfring
+
+
+2018.7.31
+/mnt/c54e1564-12e6-4c17-98c3-593d5ab92057/PF_RING/userland/examples/pfcount.c
+try to implement fingerprint
+
+./pfcount -i eno1 -f "udp and port 67" -v 2
+
+/lib/.libs
+daq_pfring.so
+daq_pfring.lai
+daq_pfring_la-daq_pfring.o
+daq_pfring.la
+
+EX:
+CONFIG_PACKAGE_libdnet=y
+cp /SmartOpenWrt/SENAO/feeds/packages/libs/postgresql . -rf
+
+snort -i br-lan -c /etc/snort/snort.conf -A fast -l /var/log
+snort --daq-dir=/lib/.libs --daq pfring --daq-mode passive -i br-lan -c /etc/snort/snort.conf -A fast -l /var/log
+
+vi /etc/snort/rules/local.rules
+alert icmp any any -> $HOME_NET any (msg:"ICMP test";sid:100000001;rev:001;)
+
+----------------------------TEST RESULT-------------------------------------
+=============================no pfring==================================================
+Run time for packet processing was 150.43461 seconds
+Snort processed 2881222 packets.
+Snort ran for 0 days 0 hours 2 minutes 30 seconds
+   Pkts/min:      1440611
+   Pkts/sec:        19208
+===============================================================================
+Packet I/O Totals:
+   Received:      2899694
+   Analyzed:      2881222 ( 99.363%)
+    Dropped:        18571 (  0.636%)
+   Filtered:            0 (  0.000%)
+Outstanding:        18472 (  0.637%)
+   Injected:            0
+===============================================================================
+
+
+===========================pfring====================================================
+Run time for packet processing was 126.30568 seconds
+Snort processed 2520837 packets.
+Snort ran for 0 days 0 hours 2 minutes 6 seconds
+   Pkts/min:      1260418
+   Pkts/sec:        20006
+===============================================================================
+Packet I/O Totals:
+   Received:      2520837
+   Analyzed:      2520837 (100.000%)
+    Dropped:           77 (  0.003%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
+===============================================================================
+
+---------------------------------------------------------------------------------------------------------------------------
+2018.7.31
+local WAMP_MSG_SPEC = {
+    HELLO = 1,
+    WELCOME = 2,
+    ABORT = 3,
+    CHALLENGE = 4,
+    AUTHENTICATE = 5,
+    GOODBYE = 6,
+    ERROR = 8,
+    PUBLISH = 16,
+    PUBLISHED = 17,
+    SUBSCRIBE = 32,
+    SUBSCRIBED = 33,
+    UNSUBSCRIBE = 34,
+    UNSUBSCRIBED = 35,
+    EVENT = 36,
+    CALL = 48,
+    CANCEL = 49,
+    RESULT = 50,
+    REGISTER = 64,
+    REGISTERED = 65,
+    UNREGISTER = 66,
+    UNREGISTERED = 67,
+    INVOCATION = 68,
+    INTERRUPT = 69,
+    YIELD = 70
+}
+[1, "ai.kaiwoo", {"roles": { "subscriber": {} } }]
+-------/SmartOpenWrt_EX/SENAO/package/libpfring/src/userland/lib/Makefile--------------FAIL--------------------------------
+install-shared:	${DYNAMICLIB} install-includes
+	mkdir -p ${stagdir}
+	#cp ${DYNAMICLIB} ${stagdir}
+	cd ${stagdir}; ln -sf ${stagdir}${DYNAMICLIB} ${stagdir}${DYNAMICLIB}.1.1.0
+	cd ${stagdir}; ln -sf ${stagdir}${DYNAMICLIB} ${stagdir}${DYNAMICLIB}.1
+#	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.7.3.0
+#	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.7
+	-@if test "$(USER)" = "root"; then \
+		ldconfig; \
+	fi
+
+-------/SmartOpenWrt_EX/SENAO/package/libpfring/src/userland/lib/Makefile---------------OK-------------------------------
+install-shared:	${DYNAMICLIB} install-includes
+	mkdir -p ${stagdir}
+	cp ${DYNAMICLIB} ${stagdir}
+	#cd ${stagdir};
+	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.1.1.0
+	#cd ${stagdir}; 
+	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.1
+#	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.7.3.0
+#	ln -sf ${DYNAMICLIB} ${DYNAMICLIB}.7
+	-@if test "$(USER)" = "root"; then \
+		ldconfig; \
+	fi
+
+
